@@ -1,0 +1,5 @@
+#define INFLUXDB_HOST "your_host"
+#define INFLUXDB_USER "your_user"
+#define INFLUXDB_PASS "your_pass"
+#define INFLUXDB_DB "your_db"
+#define INFLUXDB_MEASUREMENT "your_measurement"

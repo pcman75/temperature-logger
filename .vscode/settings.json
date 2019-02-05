@@ -1,0 +1,6 @@
+{
+    "terminal.integrated.env.osx": {
+        "PATH": "/Users/manolic/.platformio/penv/bin:/Users/manolic/.platformio/penv:/Applications/google-cloud-sdk/bin:/Library/Frameworks/Python.framework/Versions/3.6/bin:/usr/local/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin",
+        "PLATFORMIO_CALLER": "vscode"
+    }
+}
