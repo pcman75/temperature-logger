@@ -8,10 +8,15 @@
 #include <WiFiManager.h>         //https://github.com/tzapu/WiFiManager
 #include <InfluxDb.h>
 
+#include <Adafruit_Sensor.h>
+#include <Adafruit_BME280.h>
+
 #include "config.h"
 #include "OTAUpdate.h"
 
 Influxdb influx(INFLUXDB_HOST); // port defaults to 8086
+Adafruit_BME280 bme; // I2C
+#define SEALEVELPRESSURE_HPA (1013.25)
 
 void setup() {
   Serial.begin(115200);
@@ -33,10 +38,36 @@ void setup() {
   //OTA Update initialization
   OTAUpdate.begin();
   
-  //Serial.println("Ready");
-  //Serial.print("IP address: ");
-  //Serial.println(WiFi.localIP());
+  Serial.println(F("BME280 test"));
+
+  // default settings
+  // (you can also pass in a Wire library object like &Wire2)
+  if (!bme.begin(0x76)) {
+      Serial.println("Could not find a valid BME280 sensor, check wiring!");
+  }
+    
   influx.setDbAuth(INFLUXDB_DB, INFLUXDB_USER, INFLUXDB_PASS);
+}
+
+void printValues() {
+    Serial.print("Temperature = ");
+    Serial.print(bme.readTemperature());
+    Serial.println(" *C");
+
+    Serial.print("Pressure = ");
+
+    Serial.print(bme.readPressure() / 100.0F);
+    Serial.println(" hPa");
+
+    Serial.print("Approx. Altitude = ");
+    Serial.print(bme.readAltitude(SEALEVELPRESSURE_HPA));
+    Serial.println(" m");
+
+    Serial.print("Humidity = ");
+    Serial.print(bme.readHumidity());
+    Serial.println(" %");
+
+    Serial.println();
 }
 
 void loop() {
@@ -44,6 +75,9 @@ void loop() {
   //handle OTA update
   OTAUpdate.handle();
   
+  printValues();
+
+  /*
   // create a measurement object
   InfluxData measurement(INFLUXDB_MEASUREMENT);
   //measurement.addTag("device", d2);
@@ -52,6 +86,7 @@ void loop() {
   measurement.addValue("humidity", random(0, 100));
   // write it into db
   influx.write(measurement);
+  */
 
-  delay(5000);
+  delay(6000);
 }
