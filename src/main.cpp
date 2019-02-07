@@ -16,7 +16,7 @@
 
 Influxdb influx(INFLUXDB_HOST); // port defaults to 8086
 Adafruit_BME280 bme; // I2C
-#define SEALEVELPRESSURE_HPA (1013.25)
+#define SEALEVELPRESSURE_HPA (1024.99)
 
 void setup() {
   Serial.begin(115200);
@@ -45,48 +45,40 @@ void setup() {
   if (!bme.begin(0x76)) {
       Serial.println("Could not find a valid BME280 sensor, check wiring!");
   }
-    
+  
+  bme.setSampling(Adafruit_BME280::MODE_FORCED,
+                    Adafruit_BME280::SAMPLING_X1, // temperature
+                    Adafruit_BME280::SAMPLING_X1, // pressure
+                    Adafruit_BME280::SAMPLING_X1, // humidity
+                    Adafruit_BME280::FILTER_OFF   );
+
   influx.setDbAuth(INFLUXDB_DB, INFLUXDB_USER, INFLUXDB_PASS);
-}
-
-void printValues() {
-    Serial.print("Temperature = ");
-    Serial.print(bme.readTemperature());
-    Serial.println(" *C");
-
-    Serial.print("Pressure = ");
-
-    Serial.print(bme.readPressure() / 100.0F);
-    Serial.println(" hPa");
-
-    Serial.print("Approx. Altitude = ");
-    Serial.print(bme.readAltitude(SEALEVELPRESSURE_HPA));
-    Serial.println(" m");
-
-    Serial.print("Humidity = ");
-    Serial.print(bme.readHumidity());
-    Serial.println(" %");
-
-    Serial.println();
 }
 
 void loop() {
 
   //handle OTA update
   OTAUpdate.handle();
-  
-  printValues();
 
-  /*
+  // Only needed in forced mode! In normal mode, you can remove the next line.
+  bme.takeForcedMeasurement(); // has no effect in normal mode
+    
   // create a measurement object
   InfluxData measurement(INFLUXDB_MEASUREMENT);
-  //measurement.addTag("device", d2);
-  measurement.addTag("sensor", "random");
-  measurement.addValue("temperature", random(0, 40));
-  measurement.addValue("humidity", random(0, 100));
+
+  measurement.addTag("sensor", "bme280");
+  static char buf[10];
+  itoa(system_get_chip_id(), buf, HEX);
+  measurement.addTag("device", buf);
+  measurement.addTag("mode", "weather");
+
+  measurement.addValue("Temperature", bme.readTemperature());
+  measurement.addValue("Humidity", bme.readHumidity());
+  measurement.addValue("Altitude", bme.readPressure() / 100.0F);
+  measurement.addValue("Altitude", bme.readAltitude(SEALEVELPRESSURE_HPA));
+
   // write it into db
   influx.write(measurement);
-  */
-
-  delay(6000);
+  
+  delay(60000);
 }
