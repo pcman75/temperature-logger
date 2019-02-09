@@ -74,7 +74,7 @@ void loop() {
 
   measurement.addValue("Temperature", bme.readTemperature());
   measurement.addValue("Humidity", bme.readHumidity());
-  measurement.addValue("Altitude", bme.readPressure() / 100.0F);
+  measurement.addValue("Pressure", bme.readPressure() / 100.0F);
   measurement.addValue("Altitude", bme.readAltitude(SEALEVELPRESSURE_HPA));
 
   // write it into db
